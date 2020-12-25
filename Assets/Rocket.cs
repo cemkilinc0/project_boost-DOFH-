@@ -8,7 +8,9 @@ public class Rocket : MonoBehaviour
     Rigidbody rigidBody;
     AudioSource audioData;
 
-    Vector3 rotVector;
+    [SerializeField] float rcsThruster = 150f;
+    [SerializeField] float mainThruster = 1000f;
+    //Vector3 rotVector;
 
     // Start is called before the first frame update
     void Start()
@@ -23,7 +25,26 @@ public class Rocket : MonoBehaviour
         Thrust();
         Rotate();
 
-        rotVector = new Vector3(0, 0, 3);
+        //rotVector = new Vector3(0, 0, 3);
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        switch (collision.gameObject.tag)
+        {
+            case "Friendly":
+                Debug.Log("You're safe!"); // replace with action later
+                break;
+            case "Fuel":
+                Debug.Log("Getting juice!");
+                // increase fuel bar
+                break;
+
+            default:
+                Debug.Log("You died mate! GitGud!"); 
+                // kill the player. Death to the normies!
+                break;
+        }
     }
 
     private void Thrust()
@@ -33,7 +54,8 @@ public class Rocket : MonoBehaviour
             if (!audioData.isPlaying)
                 audioData.Play();
 
-            rigidBody.AddRelativeForce(Vector3.up);
+            float boostThisFrame = mainThruster * Time.deltaTime;
+            rigidBody.AddRelativeForce(Vector3.up * boostThisFrame);
         }
         else
             audioData.Stop();
@@ -41,17 +63,19 @@ public class Rocket : MonoBehaviour
 
     private void Rotate()
     {
-
         rigidBody.freezeRotation = true; // take manual control of rotation
+
+        float rotateThisFrame = rcsThruster * Time.deltaTime;
 
         if (Input.GetKey(KeyCode.A) && (!Input.GetKey(KeyCode.D))) // Go right
         {
-            transform.Rotate(rotVector);
+
+            transform.Rotate(Vector3.forward * rotateThisFrame);
         }
 
         if (Input.GetKey(KeyCode.D) && (!Input.GetKey(KeyCode.A))) // Go left
         {
-            transform.Rotate(-rotVector);
+            transform.Rotate(-Vector3.forward * rotateThisFrame);
         }
 
         rigidBody.freezeRotation = false;
